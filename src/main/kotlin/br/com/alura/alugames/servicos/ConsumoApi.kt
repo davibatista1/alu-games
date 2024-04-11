@@ -1,6 +1,10 @@
 package br.com.alura.alugames.servicos
 
-import br.com.alura.alugames.modelo.*
+import br.com.alura.alugames.modelo.Gamer
+import br.com.alura.alugames.modelo.InfoGamerJson
+import br.com.alura.alugames.modelo.InfoJogo
+import br.com.alura.alugames.modelo.InfoJogoJson
+import br.com.alura.alugames.modelo.Jogo
 import br.com.alura.alugames.utilitario.criaGamer
 import br.com.alura.alugames.utilitario.criaJogo
 import com.google.gson.Gson
@@ -12,36 +16,37 @@ import java.net.http.HttpResponse
 
 class ConsumoApi {
 
-   private fun consomeDados(endereco: String): String {
+    private fun consomeDados(endereco: String): String {
         val client: HttpClient = HttpClient.newHttpClient()
         val request = HttpRequest.newBuilder()
             .uri(URI.create(endereco))
             .build()
-
         val response = client
             .send(request, HttpResponse.BodyHandlers.ofString())
 
         return response.body()
     }
-    fun buscaJogo(id: String):InfoJogo {
+
+    fun buscaJogo(id:String): InfoJogo {
         val endereco = "https://www.cheapshark.com/api/1.0/games?id=$id"
         val json = consomeDados(endereco)
 
         val gson = Gson()
         val meuInfoJogo = gson.fromJson(json, InfoJogo::class.java)
+
         return meuInfoJogo
+
     }
 
-    fun buscaGamer():List<Gamer> {
+    fun buscaGamers(): List<Gamer> {
         val endereco = "https://raw.githubusercontent.com/jeniblodev/arquivosJson/main/gamers.json"
         val json = consomeDados(endereco)
 
         val gson = Gson()
+        val meuGamerTipo = object : TypeToken<List<InfoGamerJson>>() {}.type
+        val listaGamer:List<InfoGamerJson> = gson.fromJson(json, meuGamerTipo)
 
-        val meuGamerTipo = object : TypeToken<List<InfoGamerJson>> (){}.type
-        val listaGamer: List<InfoGamerJson> =  gson.fromJson(json, meuGamerTipo)
-
-        val listaGamerConvertida = listaGamer.map {infoGamerJson -> infoGamerJson.criaGamer()}
+        val listaGamerConvertida = listaGamer.map { infoGamerJson -> infoGamerJson.criaGamer() }
 
         return listaGamerConvertida
     }
@@ -58,4 +63,5 @@ class ConsumoApi {
 
         return listaJogoConvertida
     }
+
 }
